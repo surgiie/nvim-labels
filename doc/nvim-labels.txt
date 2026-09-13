@@ -1,0 +1,152 @@
+*nvim-labels.txt*  Label-jump navigation for Neovim
+
+==============================================================================
+INTRODUCTION                                                    *nvim-labels*
+
+Two label-jump pickers:
+
+- |nvim-labels.jump()|: press a key, every word in the visible window gets a
+  short label drawn over it, type the label, and the cursor jumps there.
+  You never type characters of the target word itself.
+- |nvim-labels.insert_char_shortcut()|: a floating window lists characters
+  you configure (`char_shortcuts`) behind labels; picking one inserts it at
+  the cursor.
+
+==============================================================================
+MAPPINGS                                              *nvim-labels-mappings*
+
+On load the plugin maps:
+
+    <leader>j    normal           |nvim-labels.jump()|
+    <C-\>        normal, insert   |nvim-labels.insert_char_shortcut()|
+
+Opt out or change a key with these variables, set BEFORE the plugin loads
+(with lazy.nvim, in an `init` function on the spec):
+
+    vim.g.labels_jump_key = "s"
+        use a different key for jump()
+
+    vim.g.labels_char_key = "<C-l>"
+        use a different key for insert_char_shortcut()
+
+    vim.g.labels_no_default_mappings = true
+        no mappings; map them yourself
+
+`labels_char_key` deliberately doesn't default through <leader>: if your
+leader is <Space> (common), an insert-mode <leader>... mapping makes every
+space you type wait out 'timeoutlen' in case the rest of the mapping follows.
+
+==============================================================================
+SETUP                                                    *nvim-labels-setup*
+
+>lua
+    require("nvim-labels").setup()
+<
+Optional; call it to change options or define the highlight groups eagerly.
+Options and their defaults:
+
+    keys                 string   "fjdkslaghrueiwotnvbc"
+        Label alphabet, most-reachable keys first. Must have >= 2 characters.
+        Shared by nvim-labels.jump() and nvim-labels.insert_char_shortcut().
+
+    pattern              string   "[%w_]+"
+        A Lua pattern (|luaref-patterns|, NOT a Vim regex) matched against
+        each visible line. Each match is a word chunk that `subwords` may
+        split further; every resulting start is a target. jump() only.
+
+    subwords             boolean  true
+        Also target sub-word parts: after "_" and "-", and at camelCase /
+        PascalCase boundaries (like nvim-spider). false = plain word starts.
+        jump() only.
+
+    dim                  boolean  true
+        Dim the rest of the visible area while labels are shown (highlight
+        group |hl-LabelDim|). jump() only.
+
+    jumplist             boolean  true
+        Push the pre-jump position onto the jumplist so |CTRL-O| returns.
+        jump() only.
+
+    exclude_cursor_word  boolean  true
+        Do not label the word the cursor is currently inside.
+        jump() only.
+
+    char_shortcuts       string[] {}
+        Characters offered by insert_char_shortcut(), in the order they
+        should get labels (most-used first): >lua
+            require("nvim-labels").setup({
+              char_shortcuts = { "!", "@", "#", "$", "%" },
+            })
+<
+        An entry may contain a `<cursor>` marker to say where the cursor
+        should land, instead of after the whole insertion: >lua
+            char_shortcuts = { "(<cursor>)", "[<cursor>]" }
+<
+        An entry may also span multiple lines with "\n"; each line becomes
+        its own buffer line, and the marker can be on any of them: >lua
+            char_shortcuts = { "if true then\n<cursor>\nend" }
+<
+        An entry may be a table instead of a plain string:
+        {char = "...", name = "..."}. `char` is still what gets inserted;
+        `name` is what the grid shows in its place, so a long or multi-line
+        entry doesn't wreck the grid's width: >lua
+            char_shortcuts = {
+              { char = "if true then\n<cursor>\nend", name = "if" },
+              { char = "^", name = "caret" },
+            }
+<
+==============================================================================
+USAGE                                                    *nvim-labels-usage*
+
+                                                             *:NvimLabelJump*
+:NvimLabelJump
+                Start a jump in the current window. Equivalent to
+                `require("nvim-labels").jump()`.
+
+                                                       *nvim-labels.jump()*
+require("nvim-labels").jump()
+                Show labels over every word and jump to the one picked.
+
+                                                    *:NvimLabelCharShortcut*
+:NvimLabelCharShortcut
+                Open the character shortcuts picker. Equivalent to
+                `require("nvim-labels").insert_char_shortcut()`.
+
+                                      *nvim-labels.insert_char_shortcut()*
+require("nvim-labels").insert_char_shortcut()
+                Show a floating window of `char_shortcuts` behind labels.
+                Picking one inserts it at the cursor and leaves you in insert
+                mode, whichever mode you called this from. Does nothing
+                (with a warning) if `char_shortcuts` is empty.
+
+During selection (both pickers):
+    <label keys>    narrow candidates; only the keys still needed are shown
+    <BS>            undo the last key
+    <Esc>, <C-c>    cancel
+
+See |nvim-labels-mappings| for the default mappings and how to change them.
+
+==============================================================================
+HIGHLIGHTS                                          *nvim-labels-highlights*
+
+Shared by both pickers.
+
+                                                             *hl-LabelPick*
+LabelPick       The label text. Default: white bold on #1e1e2e.
+                Set `bg = "NONE"` for a fully transparent jump label.
+
+                                                              *hl-LabelDim*
+LabelDim        The dimmed rest of the view (jump()) / the picker's
+                non-matching entries (insert_char_shortcut()).
+                Default: #585b70 text.
+
+Both are defined with {default = true}; a colorscheme that sets them wins.
+
+==============================================================================
+LIMITATIONS                                        *nvim-labels-limitations*
+
+nvim-labels.jump() is normal-mode motion only. No operator-pending / visual
+motions, no multi-window labeling, no search-then-label mode yet. See the
+README "Not implemented" section.
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
