@@ -21,14 +21,16 @@ On load, the plugin adds:
 | Command | Default mapping | Action |
 | --- | --- | --- |
 | `:NvimLabelJump` | `<leader>j` (normal) | Jump to a word |
+| `:NvimLabelDelete` | `<leader>d` (normal) | [Delete](#delete-to-word) from the cursor to a word |
 | `:NvimLabelCharShortcut` | `<C-\>` (normal, insert) | Insert a [character shortcut](#character-shortcuts) |
 
 Change or drop a mapping before the plugin loads (with lazy.nvim, in an `init` function on the spec):
 
 ```lua
 vim.g.labels_jump_key = "s"
+vim.g.labels_delete_key = "<leader>x"
 vim.g.labels_char_key = "<C-l>"
-vim.g.labels_no_default_mappings = true  -- map labels.jump / labels.insert_char_shortcut yourself
+vim.g.labels_no_default_mappings = true  -- map labels.jump / labels.delete / labels.insert_char_shortcut yourself
 ```
 
 > `labels_char_key` skips `<leader>` by default: if your leader is `<Space>` (common), an insert-mode `<leader>...` mapping makes every space you type wait out `timeoutlen`.
@@ -43,6 +45,16 @@ Press `<leader>j` (or `:NvimLabelJump`):
 - Type the label to jump. Multi-key labels narrow as you type, showing only the keys left to press.
 - `<BS>` undoes a key; `<Esc>` / `<C-c>` cancels.
 - The starting position goes on the jumplist (`<C-o>` returns).
+
+### Delete to word
+
+Press `<leader>d` (or `:NvimLabelDelete`). Same labels and keys as jump, but picking one deletes from the cursor to that word instead of moving:
+
+- Deletes the hinted word too. To the right the range runs through the end of that word; to the left it runs from the word's start up to, but not including, the character under the cursor.
+- With `subwords` on, "word" means the hinted part (`Bar` in `fooBar`), not the whole identifier.
+- Works across lines: a label above or below deletes everything in between and joins the remainder.
+- Goes through the unnamed register and is a single undo step. Not dot-repeatable.
+- The word under the cursor is not a target (see `exclude_cursor_word`).
 
 ### Character shortcuts
 

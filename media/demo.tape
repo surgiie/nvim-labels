@@ -43,6 +43,33 @@ Sleep 900ms
 Type "vo"
 Sleep 1300ms
 
+# Delete to a word: same labels, but picking one deletes instead of jumping.
+# To the left it deletes from that word up to the cursor...
+Hide
+Type "8G0fq"
+Sleep 300ms
+Show
+Sleep 700ms
+Type "\d"
+Sleep 900ms
+Type "k"
+Sleep 1300ms
+Type "u"
+Sleep 600ms
+
+# ...and to the right it deletes through the hinted word.
+Hide
+Type "0f{"
+Sleep 300ms
+Show
+Sleep 700ms
+Type "\d"
+Sleep 900ms
+Type "h"
+Sleep 1300ms
+Type "u"
+Sleep 800ms
+
 # Character shortcuts: pick one from the floating picker.
 Ctrl+\
 Sleep 900ms

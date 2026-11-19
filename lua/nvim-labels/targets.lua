@@ -35,7 +35,8 @@ local function subword_starts(chunk)
 end
 
 -- Target positions ({ row, col }, 0-indexed) in the visible area of `win`:
--- the start of each `pattern` chunk, split by `subwords` when enabled.
+-- the start of each `pattern` chunk, split by `subwords` when enabled. `stop`
+-- is the exclusive end column of the word.
 function M.collect(win)
   win = win or vim.api.nvim_get_current_win()
   local buf = vim.api.nvim_win_get_buf(win)
@@ -72,7 +73,7 @@ function M.collect(win)
               and cur_col >= start
               and cur_col < stop
             if not hidden and not on_cursor then
-              targets[#targets + 1] = { row = row, col = start }
+              targets[#targets + 1] = { row = row, col = start, stop = stop }
             end
           end
           col = e + 1

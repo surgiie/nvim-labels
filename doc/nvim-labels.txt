@@ -18,6 +18,7 @@ MAPPINGS                                              *nvim-labels-mappings*
 On load the plugin maps:
 
     <leader>j    normal           |nvim-labels.jump()|
+    <leader>d    normal           |nvim-labels.delete()|
     <C-\>        normal, insert   |nvim-labels.insert_char_shortcut()|
 
 Opt out or change a key with these variables, set BEFORE the plugin loads
@@ -25,6 +26,9 @@ Opt out or change a key with these variables, set BEFORE the plugin loads
 
     vim.g.labels_jump_key = "s"
         use a different key for jump()
+
+    vim.g.labels_delete_key = "<leader>x"
+        use a different key for delete()
 
     vim.g.labels_char_key = "<C-l>"
         use a different key for insert_char_shortcut()
@@ -106,6 +110,19 @@ USAGE                                                    *nvim-labels-usage*
                                                        *nvim-labels.jump()*
 require("nvim-labels").jump()
                 Show labels over every word and jump to the one picked.
+
+                                                             *:NvimLabelDelete*
+:NvimLabelDelete
+                Equivalent to `require("nvim-labels").delete()`.
+
+                                                     *nvim-labels.delete()*
+require("nvim-labels").delete()
+                Show labels like jump(), but delete charwise between the cursor
+                and the picked word instead of moving, including that word. To
+                the right the range runs through the end of the word; to the
+                left it runs from the word's start up to, not including, the
+                cursor character. Spans lines, fills the unnamed register, one
+                undo step, not dot-repeatable.
 
                                                     *:NvimLabelCharShortcut*
 :NvimLabelCharShortcut
